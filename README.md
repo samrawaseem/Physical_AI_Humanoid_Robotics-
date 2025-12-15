@@ -1,3 +1,12 @@
+---
+title: My Book Chatbot
+emoji: 📚
+colorFrom: gray
+colorTo: yellow
+sdk: docker
+app_port: 7860
+---
+
 # RAG Chatbot for Book Documentation
 
 A Retrieval-Augmented Generation (RAG) chatbot that allows users to ask questions about book content and receive contextually relevant answers using vector search and language models.

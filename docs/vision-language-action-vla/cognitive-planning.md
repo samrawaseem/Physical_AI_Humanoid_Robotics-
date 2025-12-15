@@ -1163,7 +1163,7 @@ Robots need to handle ambiguous commands gracefully:
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
-import openai
+import cohere
 import json
 import re
 from typing import Dict, List, Optional
@@ -1201,7 +1201,7 @@ class AmbiguityResolverNode(Node):
         )
 
         # Initialize
-        openai.api_key = self.get_parameter_or('openai_api_key', 'your-api-key-here').value
+        self.cohere_client = cohere.Client(self.get_parameter_or('cohere_api_key', 'your-api-key-here').value)
         self.current_state = {}
         self.pending_resolutions = {}
 
@@ -1333,23 +1333,14 @@ class AmbiguityResolverNode(Node):
         """
 
         try:
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "You are a helpful robot assistant. When users give ambiguous commands, ask specific questions to clarify their intent."
-                    },
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
-                ],
-                temperature=0.7,
-                max_tokens=100
+            response = self.cohere_client.chat(
+                model="command-r-plus",
+                message=prompt,
+                preamble="You are a helpful robot assistant. When users give ambiguous commands, ask specific questions to clarify their intent.",
+                temperature=0.7
             )
 
-            return response.choices[0].message['content'].strip()
+            return response.text
 
         except Exception as e:
             self.get_logger().error(f'LLM clarification generation error: {e}')
@@ -1415,23 +1406,14 @@ class AmbiguityResolverNode(Node):
         """
 
         try:
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "You are a command clarifier. Generate a clear, specific command based on the original ambiguous command and user clarification."
-                    },
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
-                ],
-                temperature=0.3,
-                max_tokens=100
+            response = self.cohere_client.chat(
+                model="command-r-plus",
+                message=prompt,
+                preamble="You are a command clarifier. Generate a clear, specific command based on the original ambiguous command and user clarification.",
+                temperature=0.3
             )
 
-            resolved_command = response.choices[0].message['content'].strip()
+            resolved_command = response.text
 
             # Publish resolved command
             resolved_msg = String()

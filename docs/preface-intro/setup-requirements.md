@@ -96,8 +96,8 @@ pip install --upgrade pip
 # Install essential packages
 pip install numpy scipy matplotlib pandas jupyter
 
-# Install OpenAI API client for LLM integration
-pip install openai
+# Install Cohere API client for LLM integration
+pip install cohere
 
 # Install speech recognition packages
 pip install SpeechRecognition pyaudio

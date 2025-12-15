@@ -137,7 +137,7 @@ source ~/robotics_env/bin/activate
 #### Install required Python packages
 ```bash
 pip install numpy scipy matplotlib pandas
-pip install openai whisper speech-recognition pyaudio
+pip install cohere whisper speech-recognition pyaudio
 pip install opencv-python transforms3d
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 ```

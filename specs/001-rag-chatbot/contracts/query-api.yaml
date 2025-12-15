@@ -1,0 +1,129 @@
+# API Contracts: RAG Chatbot for Existing Book
+
+## Endpoints
+
+### POST /api/query
+- **Purpose**: Process user queries and return RAG-generated responses
+- **Description**: Accepts user questions and optional selected text context, queries the vector store, and generates responses using the language model
+
+#### Request
+```json
+{
+  "question": "string, required - The user's question about the book content",
+  "selected_text": "string, optional - Text selected by the user for context-specific queries"
+}
+```
+
+#### Response (Success)
+```json
+{
+  "answer": "string - The generated answer based on book content",
+  "sources": [
+    {
+      "content_snippet": "string - Relevant snippet from book content",
+      "page_reference": "string - Reference to the source page",
+      "similarity_score": "number - Similarity score of the match"
+    }
+  ],
+  "session_id": "string - Unique identifier for the chat session",
+  "message_id": "string - Unique identifier for this message"
+}
+```
+
+#### Response (Error)
+```json
+{
+  "error": "string - Error message describing the issue",
+  "code": "string - Error code for client handling"
+}
+```
+
+#### Status Codes
+- 200: Query processed successfully
+- 400: Invalid request parameters
+- 500: Internal server error (vector store or language model unavailable)
+
+## Data Schemas
+
+### QueryRequest
+```json
+{
+  "type": "object",
+  "properties": {
+    "question": {
+      "type": "string",
+      "description": "The user's question about the book content",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "selected_text": {
+      "type": "string",
+      "description": "Text selected by the user for context-specific queries",
+      "maxLength": 5000
+    }
+  },
+  "required": ["question"]
+}
+```
+
+### QueryResponse
+```json
+{
+  "type": "object",
+  "properties": {
+    "answer": {
+      "type": "string",
+      "description": "The generated answer based on book content"
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "content_snippet": {
+            "type": "string",
+            "description": "Relevant snippet from book content"
+          },
+          "page_reference": {
+            "type": "string",
+            "description": "Reference to the source page"
+          },
+          "similarity_score": {
+            "type": "number",
+            "description": "Similarity score of the match",
+            "minimum": 0,
+            "maximum": 1
+          }
+        }
+      }
+    },
+    "session_id": {
+      "type": "string",
+      "description": "Unique identifier for the chat session"
+    },
+    "message_id": {
+      "type": "string",
+      "description": "Unique identifier for this message"
+    }
+  },
+  "required": ["answer", "session_id", "message_id"]
+}
+```
+
+### ErrorResponse
+```json
+{
+  "type": "object",
+  "properties": {
+    "error": {
+      "type": "string",
+      "description": "Error message describing the issue"
+    },
+    "code": {
+      "type": "string",
+      "description": "Error code for client handling"
+    }
+  },
+  "required": ["error", "code"]
+}
+```

@@ -145,7 +145,7 @@ In this exercise, you will implement cognitive planning using large language mod
 - Execute complex multi-step tasks
 
 ### Prerequisites
-- OpenAI API access
+- Cohere API access
 - ROS 2 action servers for basic tasks
 - Understanding of task planning concepts
 
@@ -158,7 +158,9 @@ In this exercise, you will implement cognitive planning using large language mod
            super().__init__('cognitive_planner')
 
            # Initialize LLM client
-           self.llm_client = openai.OpenAI()
+           import cohere
+           # Ensure COHERE_API_KEY is available in environment or pass directly
+           self.llm_client = cohere.Client(os.getenv('COHERE_API_KEY'))
 
            # Publishers/subscribers for planning
            self.goal_sub = self.create_subscription(
@@ -182,13 +184,14 @@ In this exercise, you will implement cognitive planning using large language mod
            5. Release object Y
            """
 
-           response = self.llm_client.chat.completions.create(
-               model="gpt-3.5-turbo",
-               messages=[{"role": "user", "content": prompt}],
-               max_tokens=500
+           response = self.llm_client.chat(
+               model="command-r-plus",
+               message=prompt,
+               preamble="You are a robot planning assistant.",
+               temperature=0.3
            )
 
-           return response.choices[0].message.content
+           return response.text
    ```
 
 2. **Implement Plan Execution**

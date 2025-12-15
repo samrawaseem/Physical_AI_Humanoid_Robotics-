@@ -180,7 +180,7 @@ from std_msgs.msg import String
 from geometry_msgs.msg import PoseStamped
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
-import openai
+import cohere
 import json
 from datetime import datetime
 from typing import Dict, List, Optional
@@ -226,7 +226,7 @@ class ContextAwareLLMNode(Node):
 
         # Initialize components
         self.bridge = CvBridge()
-        openai.api_key = self.get_parameter_or('openai_api_key', 'your-api-key-here').value
+        self.cohere_client = cohere.Client(self.get_parameter_or('cohere_api_key', 'your-api-key-here').value)
 
         # Context management
         self.context_history = []
@@ -276,17 +276,14 @@ class ContextAwareLLMNode(Node):
         """
 
         try:
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": self.system_prompt},
-                    {"role": "user", "content": prompt}
-                ],
-                temperature=0.3,
-                max_tokens=200
+            response = self.cohere_client.chat(
+                model="command-r-plus",
+                message=prompt,
+                preamble=self.system_prompt,
+                temperature=0.3
             )
 
-            response_text = response.choices[0].message['content'].strip()
+            response_text = response.text
 
             # Extract JSON response
             action_json = self.extract_json_from_response(response_text)
@@ -382,17 +379,14 @@ class ContextAwareLLMNode(Node):
         """
 
         try:
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": self.system_prompt},
-                    {"role": "user", "content": prompt}
-                ],
-                temperature=0.7,
-                max_tokens=150
+            response = self.cohere_client.chat(
+                model="command-r-plus",
+                message=prompt,
+                preamble=self.system_prompt,
+                temperature=0.7
             )
 
-            response_text = response.choices[0].message['content'].strip()
+            response_text = response.text
 
             # Publish response
             response_msg = String()
@@ -427,7 +421,7 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
 from geometry_msgs.msg import Pose
-import openai
+import cohere
 import json
 from typing import List, Dict, Any
 import re
@@ -464,8 +458,8 @@ class CognitivePlanningNode(Node):
             10
         )
 
-        # Initialize OpenAI
-        openai.api_key = self.get_parameter_or('openai_api_key', 'your-api-key-here').value
+        # Initialize Cohere
+        self.cohere_client = cohere.Client(self.get_parameter_or('cohere_api_key', 'your-api-key-here').value)
 
         # Planning state
         self.current_plan = []
@@ -534,17 +528,14 @@ class CognitivePlanningNode(Node):
     def generate_plan(self, command):
         """Generate a detailed plan using LLM"""
         try:
-            response = openai.ChatCompletion.create(
-                model="gpt-4",  # Using GPT-4 for better reasoning
-                messages=[
-                    {"role": "system", "content": self.planning_prompt},
-                    {"role": "user", "content": f"Goal: {command}"}
-                ],
-                temperature=0.2,
-                max_tokens=1000
+            response = self.cohere_client.chat(
+                model="command-r-plus",
+                message=f"Goal: {command}",
+                preamble=self.planning_prompt,
+                temperature=0.2
             )
 
-            response_text = response.choices[0].message['content'].strip()
+            response_text = response.text
 
             # Extract JSON plan
             plan_json = self.extract_json_from_response(response_text)
@@ -636,17 +627,14 @@ class CognitivePlanningNode(Node):
             """
 
             try:
-                response = openai.ChatCompletion.create(
-                    model="gpt-4",
-                    messages=[
-                        {"role": "system", "content": self.planning_prompt},
-                        {"role": "user", "content": replan_prompt}
-                    ],
-                    temperature=0.3,
-                    max_tokens=1000
+                response = self.cohere_client.chat(
+                    model="command-r-plus",
+                    message=replan_prompt,
+                    preamble=self.planning_prompt,
+                    temperature=0.3
                 )
 
-                response_text = response.choices[0].message['content'].strip()
+                response_text = response.text
                 plan_json = self.extract_json_from_response(response_text)
 
                 if plan_json and 'subtasks' in plan_json:
@@ -691,7 +679,7 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
 from geometry_msgs.msg import PoseStamped
-import openai
+import cohere
 import json
 from typing import Optional
 
@@ -734,7 +722,7 @@ class ErrorHandlingLLMNode(Node):
         )
 
         # Initialize
-        openai.api_key = self.get_parameter_or('openai_api_key', 'your-api-key-here').value
+        self.cohere_client = cohere.Client(self.get_parameter_or('cohere_api_key', 'your-api-key-here').value)
         self.environment_info = {}
         self.pending_clarifications = {}
 
@@ -817,23 +805,15 @@ class ErrorHandlingLLMNode(Node):
         """Process validated command"""
         try:
             # Use LLM to process the command
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "You are a helpful robot assistant. Respond with executable actions in JSON format."
-                    },
-                    {
-                        "role": "user",
-                        "content": f"Command: {command}\nEnvironment: {context['environment']}\nProvide action in JSON format."
-                    }
-                ],
-                temperature=0.1,
-                max_tokens=200
+            # Use LLM to process the command
+            response = self.cohere_client.chat(
+                model="command-r-plus",
+                message=f"Command: {command}\nEnvironment: {context['environment']}\nProvide action in JSON format.",
+                preamble="You are a helpful robot assistant. Respond with executable actions in JSON format.",
+                temperature=0.1
             )
 
-            return response.choices[0].message['content'].strip()
+            return response.text
 
         except Exception as e:
             self.get_logger().error(f'Command processing error: {e}')

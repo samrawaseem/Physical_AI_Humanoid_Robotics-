@@ -1,0 +1,89 @@
+/* src/components/Chatbot/FloatingChatbotButton.css */
+.floating-chatbot {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  font-family: 'Roboto', sans-serif;
+}
+
+.floating-chatbot-button {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  font-size: 24px;
+}
+
+.floating-chatbot-button:hover,
+.floating-chatbot-button.hovered {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+.chatbot-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.chatbot-window {
+  position: relative;
+  width: 350px;
+  height: 500px;
+  max-width: 90vw;
+  max-height: 80vh;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.close-chatbot-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: #f0f0f0;
+  color: #333;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  z-index: 10;
+  transition: background-color 0.2s;
+}
+
+.close-chatbot-button:hover {
+  background: #e0e0e0;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .chatbot-window {
+    width: 95vw;
+    height: 70vh;
+    bottom: 10px;
+    right: 10px;
+    left: 10px;
+  }
+
+  .floating-chatbot-button {
+    width: 50px;
+    height: 50px;
+  }
+}

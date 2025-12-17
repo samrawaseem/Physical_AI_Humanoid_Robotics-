@@ -11,7 +11,7 @@
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #772aee 0%, #9454f2 100%);
   border: none;
   color: white;
   cursor: pointer;
@@ -27,7 +27,7 @@
 .floating-chatbot-button.hovered {
   transform: scale(1.1);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  background: linear-gradient(135deg, #9454f2 0%, #772aee 100%);
 }
 
 .chatbot-icon {

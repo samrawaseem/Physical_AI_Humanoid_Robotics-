@@ -1,34 +1,21 @@
-# Use an official Python runtime as a parent image
+# Use official Python runtime as a parent image
 FROM python:3.9-slim
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+# Set the working directory to /app/backend
+# We use this structure to match the layout expected by deploy.py
+WORKDIR /app/backend
 
-# Set work directory
-WORKDIR /app
-
-# Install system dependencies
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        build-essential \
-        gcc \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy requirements file
+# Copy requirements first for caching
 COPY requirements.txt .
 
-# Install Python dependencies
+# Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy project
+# Copy the rest of the backend code
 COPY . .
 
-# Create logs directory
-RUN mkdir -p logs
+# Expose the port (Hugging Face Spaces uses 7860)
+EXPOSE 7860
 
-# Expose port
-EXPOSE 8000
-
-# Run the application
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
+# Run the deployment script
+CMD ["python", "deploy.py"]

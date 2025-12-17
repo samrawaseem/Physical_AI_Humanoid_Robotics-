@@ -44,6 +44,9 @@ COPY backend/ ./backend/
 # Copy built frontend assets from Stage 1 to a static directory
 COPY --from=build-frontend /app/frontend/build ./static
 
+# Copy app.py
+COPY app.py ./
+
 # Create a non-root user (good practice for HF Spaces)
 RUN useradd -m -u 1000 user
 USER user
@@ -54,4 +57,4 @@ ENV HOME=/home/user \
 EXPOSE 7860
 
 # Run the deployment script
-CMD ["python", "backend/deploy.py"]
+CMD ["python", "app.py"]
